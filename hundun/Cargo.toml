@@ -12,3 +12,14 @@ hundun is a high-performance, scalable, and reliable AI gateway for AI services 
 """
 
 [dependencies]
+async-trait = "0.1.85"
+bytes = "1.9.0"
+env_logger = "0.11.6"
+log.workspace = true
+pingora = { version = "0.4.0", features = ["openssl"] }
+pingora-core = "0.4.0"
+pingora-http = "0.4.0"
+pingora-proxy = "0.4.0"
+
+[features]
+default = []
