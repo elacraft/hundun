@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["hundun"]
+
+[workspace.dependencies]
+tokio = "1"
+http = "1.0.0"
+log = "0.4"
+
+[profile.bench]
+debug = true

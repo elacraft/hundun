@@ -1,0 +1,14 @@
+[package]
+name = "hundun"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jamin Lai <jamin@elacraft.com>"]
+license = "AGPL-3.0"
+repository = "https://github.com/cloudflare/pingora"
+categories = ["web-programming"]
+keywords = ["http", "pingora"]
+description = """
+hundun is a high-performance, scalable, and reliable AI gateway for AI services and models.
+"""
+
+[dependencies]
