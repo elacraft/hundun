@@ -1,7 +1,8 @@
 // Copyright 2025 Elacraft LLC.
 
 use crate::providers::Provider;
-use pingora_core::upstreams::peer::HttpPeer;
+use log::debug;
+use pingora_http::ResponseHeader;
 
 pub struct OllamaProvider {
     pub name: String,
@@ -28,19 +29,14 @@ impl Provider for OllamaProvider {
         self.base_url.clone()
     }
 
-    fn peer(&self) -> Box<pingora::prelude::HttpPeer> {
-        let hostname = self.base_url.split('/').nth(2).unwrap();
-        let port = self
-            .base_url
-            .split(':')
-            .nth(2)
-            .unwrap()
-            .parse::<u16>()
-            .unwrap();
-        Box::new(HttpPeer::new(
-            (hostname, port),
-            self.tls,
-            hostname.to_string(),
-        ))
+    fn tls(&self) -> bool {
+        self.tls
+    }
+
+    fn process_request_header(&self, _upstream_request: &mut pingora_http::RequestHeader) {
+        debug!("ollama process_request_header");
+    }
+    fn process_respsonse_header(&self, _upstream_request: &mut ResponseHeader) {
+        debug!("ollama process_respsonse_header");
     }
 }

@@ -1,7 +1,8 @@
 // Copyright 2025 Elacraft LLC.
 
 use crate::providers::Provider;
-use pingora_core::upstreams::peer::HttpPeer;
+use log::debug;
+use pingora_http::ResponseHeader;
 
 pub struct OpenAIProvider {
     pub name: String,
@@ -28,14 +29,18 @@ impl Provider for OpenAIProvider {
         self.base_url.clone()
     }
 
-    fn peer(&self) -> Box<pingora::prelude::HttpPeer> {
-        let hostname = self.base_url.split('/').nth(2).unwrap();
+    fn tls(&self) -> bool {
+        self.tls
+    }
 
-        let port = if self.tls { 443 } else { 80 };
-        Box::new(HttpPeer::new(
-            (hostname, port),
-            self.tls,
-            hostname.to_string(),
-        ))
+    fn process_request_header(&self, upstream_request: &mut pingora_http::RequestHeader) {
+        debug!("OpenAI process_request_header");
+        upstream_request
+            .insert_header("Host", "api.openai.com")
+            .unwrap();
+    }
+
+    fn process_respsonse_header(&self, _upstream_request: &mut ResponseHeader) {
+        debug!("ollama process_respsonse_header");
     }
 }

@@ -1,24 +1,32 @@
 // Copyright 2025 Elacraft LLC.
 
 use pingora_core::upstreams::peer::HttpPeer;
+use pingora_http::{RequestHeader, ResponseHeader};
 
 mod ollama;
 mod openai;
 pub use ollama::OllamaProvider;
 pub use openai::OpenAIProvider;
 
-use crate::error::GatewayError;
-
-pub trait Provider {
+pub trait Provider: Send + Sync {
     fn name(&self) -> String;
     fn base_url(&self) -> String;
-    fn peer(&self) -> Box<HttpPeer>;
+    fn tls(&self) -> bool;
+    fn peer(&self) -> Box<pingora::prelude::HttpPeer> {
+        let base_url = url::Url::parse(&self.base_url()).unwrap();
+        let hostname = base_url.host_str().unwrap().to_owned();
+        let sni = hostname.clone();
+        let port = base_url.port_or_known_default().unwrap();
+        Box::new(HttpPeer::new((hostname, port), self.tls(), sni))
+    }
+    fn process_request_header(&self, upstream_request: &mut RequestHeader);
+    fn process_respsonse_header(&self, upstream_request: &mut ResponseHeader);
 }
 
-pub fn create_provider(name: &str) -> Result<Box<dyn Provider>, GatewayError> {
+pub fn create_provider(name: &str) -> Option<Box<dyn Provider>> {
     match name {
-        "openai" => Ok(Box::new(OpenAIProvider::new())),
-        "ollama" => Ok(Box::new(OllamaProvider::new())),
-        _ => Err(GatewayError::InvalidProvider),
+        "openai" => Some(Box::new(OpenAIProvider::new())),
+        "ollama" => Some(Box::new(OllamaProvider::new())),
+        _ => None,
     }
 }

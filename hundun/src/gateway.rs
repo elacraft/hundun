@@ -7,7 +7,7 @@ use pingora_proxy::{ProxyHttp, Session};
 
 use crate::error::GatewayError;
 use crate::providers::create_provider;
-use crate::providers::{OpenAIProvider, Provider};
+use crate::providers::Provider;
 
 pub struct Context {
     provider: Box<dyn Provider>,
@@ -20,81 +20,51 @@ impl ProxyHttp for Gateway {
     type CTX = Context;
     fn new_ctx(&self) -> Self::CTX {
         Context {
-            provider: "default".to_string(),
+            provider: create_provider("openai").expect("Failed to create default provider"),
         }
     }
 
     async fn early_request_filter(&self, session: &mut Session, ctx: &mut Self::CTX) -> Result<()> {
         debug!("early_request_filter, {:?}", session.req_header().headers);
-        ctx.provider = session
-            .req_header()
-            .headers
-            .get("x-ai-provider")
-            .and_then(|v| v.to_str().ok())
-            .unwrap_or("openai")
-            .to_string();
-        Ok(())
-    }
-
-    async fn request_filter(&self, session: &mut Session, ctx: &mut Self::CTX) -> Result<bool> {
         let provider = session
             .req_header()
             .headers
             .get("x-ai-provider")
-            .map(|v| v.to_str());
-        match provider {
-            Some(provider) => {
-                debug!("provider: {:?}, ctx.provider: {}", provider, ctx.provider);
-            }
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("empty");
+
+        ctx.provider = match create_provider(provider) {
+            Some(provider) => provider,
             _ => {
-                info!("Header x-ai-provider is needed");
+                error!("Invalid x-ai-provider Header");
                 let _ = session.respond_error(403).await;
-                return Ok(true);
+                return Err(GatewayError::InvalidProvider.to_error());
             }
-        }
+        };
+
+        Ok(())
+    }
+
+    async fn request_filter(&self, _session: &mut Session, _ctx: &mut Self::CTX) -> Result<bool> {
         Ok(false)
     }
 
     async fn upstream_peer(
         &self,
-        session: &mut Session,
-        _ctx: &mut Self::CTX,
+        _session: &mut Session,
+        ctx: &mut Self::CTX,
     ) -> Result<Box<HttpPeer>> {
-        let provider = session
-            .req_header()
-            .headers
-            .get("x-ai-provider")
-            .and_then(|v| v.to_str().ok());
-
-        let addr = match provider {
-            Some("openai") => ("api.openai.com", 443),
-            Some("ollama") => ("localhost", 11434),
-            _ => ("0.0.0.0", 6666), // fixme: use a default provider
-        };
-
-        debug!("connecting to {addr:?}");
-
-        let sni = addr.0.to_string();
-        let tls = if addr.1 == 443 { true } else { false };
-        let peer = Box::new(HttpPeer::new(addr, tls, sni));
-        info!("tls: {tls}, peer: {peer}, peer: {peer}");
-        Ok(peer)
+        Ok(ctx.provider.peer())
     }
 
     async fn upstream_request_filter(
         &self,
-        session: &mut Session,
+        _session: &mut Session,
         upstream_request: &mut RequestHeader,
-        _ctx: &mut Self::CTX,
+        ctx: &mut Self::CTX,
     ) -> Result<()> {
-        let provider = session
-            .req_header()
-            .headers
-            .get("x-ai-provider")
-            .and_then(|v| v.to_str().ok());
-        if provider == Some("openai") {
-            let _ = upstream_request.insert_header("Host", "api.openai.com");
-        }
+        ctx.provider.process_request_header(upstream_request);
+
         upstream_request.remove_header("x-ai-provider");
         Ok(())
     }
@@ -123,8 +93,9 @@ impl ProxyHttp for Gateway {
             .response_written()
             .map_or(0, |resp| resp.status.as_u16());
         info!(
-            "{} response code: {response_code}",
-            self.request_summary(session, ctx)
+            "{} response code: {response_code}, provider: {}",
+            self.request_summary(session, ctx),
+            ctx.provider.name()
         );
     }
 }
