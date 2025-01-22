@@ -65,6 +65,9 @@ example:
 test-single:
 	$(CARGO) test $(TEST)
 
+test-hurl:
+	hurl hundun/tests/*.hurl
+
 # Build and run the project in release mode
 run-release: release
 	$(RELEASE_TARGET)/$(BIN_NAME)
