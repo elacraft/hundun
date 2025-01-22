@@ -3,8 +3,10 @@
 use pingora_core::upstreams::peer::HttpPeer;
 use pingora_http::{RequestHeader, ResponseHeader};
 
+mod deepseek;
 mod ollama;
 mod openai;
+pub use deepseek::DeepseekProvider;
 pub use ollama::OllamaProvider;
 pub use openai::OpenAIProvider;
 
@@ -27,6 +29,7 @@ pub fn create_provider(name: &str) -> Option<Box<dyn Provider>> {
     match name {
         "openai" => Some(Box::new(OpenAIProvider::new())),
         "ollama" => Some(Box::new(OllamaProvider::new())),
+        "deepseek" => Some(Box::new(DeepseekProvider::new())),
         _ => None,
     }
 }

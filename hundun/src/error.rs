@@ -1,3 +1,5 @@
+// Copyright 2025 Elacraft LLC.
+
 use pingora_core::{Error, ErrorSource, ErrorType};
 use std::fmt;
 
@@ -21,7 +23,6 @@ impl fmt::Display for GatewayError {
 impl std::error::Error for GatewayError {}
 
 impl GatewayError {
-    // 根据 GatewayError 枚举值创建一个 Error 对象
     pub fn to_error(&self) -> Box<Error> {
         match self {
             GatewayError::InvalidMethod => {
