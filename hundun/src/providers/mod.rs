@@ -6,9 +6,6 @@ use pingora_http::{RequestHeader, ResponseHeader};
 mod deepseek;
 mod ollama;
 mod openai;
-pub use deepseek::DeepseekProvider;
-pub use ollama::OllamaProvider;
-pub use openai::OpenAIProvider;
 
 pub trait Provider: Send + Sync {
     fn name(&self) -> String;
@@ -27,9 +24,9 @@ pub trait Provider: Send + Sync {
 
 pub fn create_provider(name: &str) -> Option<Box<dyn Provider>> {
     match name {
-        "openai" => Some(Box::new(OpenAIProvider::new())),
-        "ollama" => Some(Box::new(OllamaProvider::new())),
-        "deepseek" => Some(Box::new(DeepseekProvider::new())),
+        "openai" => Some(Box::new(openai::OpenAIProvider::new())),
+        "ollama" => Some(Box::new(ollama::OllamaProvider::new())),
+        "deepseek" => Some(Box::new(deepseek::DeepseekProvider::new())),
         _ => None,
     }
 }

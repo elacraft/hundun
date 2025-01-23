@@ -41,7 +41,7 @@ check:
 
 # Lint the code
 clippy:
-	$(CARGO) clippy
+	$(CARGO) clippy -- -D warnings
 
 # Generate documentation
 doc:
