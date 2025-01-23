@@ -65,6 +65,9 @@ example:
 test-single:
 	$(CARGO) test $(TEST)
 
+test-hurl:
+	hurl hundun/tests/*.hurl
+
 # Build and run the project in release mode
 run-release: release
 	$(RELEASE_TARGET)/$(BIN_NAME)
@@ -74,4 +77,4 @@ run-debug: build
 	$(DEBUG_TARGET)/$(BIN_NAME)
 
 # Phony targets
-.PHONY: all build release run test clean fmt check clippy doc update bench example test-single run-release run-debug
+.PHONY: all build release run test clean fmt check clippy doc update bench example test-single test-hurl run-release run-debug
