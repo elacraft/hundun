@@ -22,7 +22,7 @@ pub trait Provider: Send + Sync {
         Box::new(HttpPeer::new((hostname, port), self.tls(), sni))
     }
     fn process_request_header(&self, upstream_request: &mut RequestHeader);
-    fn process_respsonse_header(&self, upstream_request: &mut ResponseHeader);
+    fn process_response_header(&self, upstream_request: &mut ResponseHeader);
 }
 
 pub fn create_provider(name: &str) -> Option<Box<dyn Provider>> {

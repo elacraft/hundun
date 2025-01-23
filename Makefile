@@ -77,4 +77,4 @@ run-debug: build
 	$(DEBUG_TARGET)/$(BIN_NAME)
 
 # Phony targets
-.PHONY: all build release run test clean fmt check clippy doc update bench example test-single run-release run-debug
+.PHONY: all build release run test clean fmt check clippy doc update bench example test-single test-hurl run-release run-debug

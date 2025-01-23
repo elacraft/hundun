@@ -39,7 +39,7 @@ impl ProxyHttp for Gateway {
             Some(provider) => provider,
             _ => {
                 error!("Invalid x-ai-provider Header");
-                let _ = session.respond_error(403).await;
+                session.respond_error(403).await?;
                 return Err(GatewayError::InvalidProvider.to_error());
             }
         };
@@ -80,7 +80,7 @@ impl ProxyHttp for Gateway {
     where
         Self::CTX: Send + Sync,
     {
-        upstream_response.insert_header("Server", "Hundun").unwrap();
+        upstream_response.insert_header("Server", "Hundun")?;
 
         Ok(())
     }

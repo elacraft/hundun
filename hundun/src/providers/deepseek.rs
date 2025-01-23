@@ -10,10 +10,16 @@ pub struct DeepseekProvider {
     pub tls: bool,
 }
 
+impl Default for DeepseekProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DeepseekProvider {
     pub fn new() -> Self {
         Self {
-            name: "".to_string(),
+            name: "deepseek".to_string(),
             base_url: "https://api.deepseek.com".to_string(),
             tls: true,
         }
@@ -37,7 +43,7 @@ impl Provider for DeepseekProvider {
         debug!("Deepseek process_request_header");
     }
 
-    fn process_respsonse_header(&self, _upstream_request: &mut ResponseHeader) {
-        debug!("Deepseek process_respsonse_header");
+    fn process_response_header(&self, _upstream_request: &mut ResponseHeader) {
+        debug!("Deepseek process_response_header");
     }
 }

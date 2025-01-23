@@ -20,6 +20,12 @@ impl OpenAIProvider {
     }
 }
 
+impl Default for OpenAIProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Provider for OpenAIProvider {
     fn name(&self) -> String {
         self.name.clone()
@@ -35,12 +41,12 @@ impl Provider for OpenAIProvider {
 
     fn process_request_header(&self, upstream_request: &mut pingora_http::RequestHeader) {
         debug!("OpenAI process_request_header");
-        upstream_request
-            .insert_header("Host", "api.openai.com")
-            .unwrap();
+        if let Err(e) = upstream_request.insert_header("Host", "api.openai.com") {
+            debug!("Failed to insert Host header: {:?}", e);
+        }
     }
 
-    fn process_respsonse_header(&self, _upstream_request: &mut ResponseHeader) {
-        debug!("ollama process_respsonse_header");
+    fn process_response_header(&self, _upstream_request: &mut ResponseHeader) {
+        debug!("ollama process_response_header");
     }
 }

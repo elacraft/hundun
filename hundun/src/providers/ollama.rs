@@ -20,6 +20,12 @@ impl OllamaProvider {
     }
 }
 
+impl Default for OllamaProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Provider for OllamaProvider {
     fn name(&self) -> String {
         self.name.clone()
@@ -36,7 +42,8 @@ impl Provider for OllamaProvider {
     fn process_request_header(&self, _upstream_request: &mut pingora_http::RequestHeader) {
         debug!("ollama process_request_header");
     }
-    fn process_respsonse_header(&self, _upstream_request: &mut ResponseHeader) {
-        debug!("ollama process_respsonse_header");
+
+    fn process_response_header(&self, _upstream_request: &mut ResponseHeader) {
+        debug!("ollama process_response_header");
     }
 }
