@@ -1,7 +1,7 @@
 name: Hundun
 on:
   push:
-    branches: [ "main", "feat/github-action" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
